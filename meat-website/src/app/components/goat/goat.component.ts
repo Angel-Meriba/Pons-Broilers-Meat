@@ -2,18 +2,20 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService, CartItem } from '../../services/cart.service';
 
-interface WeightOption {
-  weight: string;
-  price: number;
-}
-
-interface Product {
+interface GoatProduct {
+  id: string;
   name: string;
-  image: string;
   description: string;
-  weightOptions: WeightOption[];
+  image: string;
+  variants: {
+    weight: string;
+    price: number;
+  }[];
   quantity: number;
-  selectedOption?: WeightOption;
+  selectedVariant?: {
+    weight: string;
+    price: number;
+  };
 }
 
 @Component({
@@ -22,7 +24,7 @@ interface Product {
   imports: [CommonModule],
   template: `
     <div class="container my-5">
-      <h1 class="mb-4">Fresh Goat Products</h1>
+      <h1 class="section-title">Fresh Mutton</h1>
       
       <div class="product-grid">
         <div class="product-item" *ngFor="let product of products">
@@ -34,14 +36,14 @@ interface Product {
               <h3>{{ product.name }}</h3>
               <p>{{ product.description }}</p>
               <div class="weight-options">
-                <div class="option" *ngFor="let option of product.weightOptions">
+                <div class="option" *ngFor="let variant of product.variants">
                   <div class="price-row">
                     <div class="weight-price-info">
                       <div class="weight-info">
-                        <span class="weight">{{ option.weight }}</span>
+                        <span class="weight">{{ variant.weight }}</span>
                       </div>
                       <div class="price-info">
-                        <span class="price">₹{{ option.price }}</span>
+                        <span class="price">₹{{ variant.price }}</span>
                       </div>
                     </div>
                     <div class="quantity-control">
@@ -49,13 +51,16 @@ interface Product {
                         <i class="bi bi-lightning-fill"></i>
                         Today in 120 mins
                       </div>
-                      <div class="controls" *ngIf="product.quantity === 0 || (product.selectedOption !== option)">
-                        <button class="btn btn-brown" (click)="addToCart(product, option)">Add to Cart</button>
+                      <div class="controls" *ngIf="product.quantity === 0 || (product.selectedVariant !== variant)">
+                        <button class="add-btn" (click)="addToCart(product, variant)">
+                          ADD
+                          <span class="plus-icon">+</span>
+                        </button>
                       </div>
-                      <div class="controls quantity-buttons" *ngIf="product.quantity > 0 && product.selectedOption === option">
-                        <button class="btn btn-outline-brown" (click)="decreaseQuantity(product)">−</button>
+                      <div class="controls quantity-buttons" *ngIf="product.quantity > 0 && product.selectedVariant === variant">
+                        <button (click)="decreaseQuantity(product)">−</button>
                         <span class="quantity">{{ product.quantity }}</span>
-                        <button class="btn btn-outline-brown" (click)="increaseQuantity(product)">+</button>
+                        <button (click)="increaseQuantity(product, variant)">+</button>
                       </div>
                     </div>
                   </div>
@@ -68,235 +73,326 @@ interface Product {
     </div>
   `,
   styles: [`
+    .section-title {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 24px;
-      margin: 0;
-      padding: 8px;
+      padding: 0 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .product-item {
+      display: flex;
+      height: 100%;
     }
 
     .product-card {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
       background: white;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       overflow: hidden;
-      transition: transform 0.2s;
+      border: 1px solid #f0f0f0;
+      transition: all 0.3s ease;
+      padding: 12px;
     }
 
     .product-card:hover {
-      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
     }
 
     .img-wrapper {
-      height: 200px;
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 8px;
       overflow: hidden;
+      background: #f8f8f8;
     }
 
     .img-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
     .card-body {
-      padding: 1rem;
+      padding: 12px 0;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .card-body h3 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 8px;
+      line-height: 1.3;
     }
 
     .card-body p {
+      font-size: 14px;
       color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
+      margin: 0 0 12px;
+      line-height: 1.4;
     }
 
-    .weight-options .option {
-      margin-bottom: 0.5rem;
+    .weight-options {
+      margin-top: auto;
+    }
+
+    .option {
+      margin-bottom: 8px;
+    }
+
+    .option:last-child {
+      margin-bottom: 0;
     }
 
     .price-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem;
-      background: #f8f9fa;
-      border-radius: 4px;
+      gap: 8px;
     }
 
     .weight-price-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex: 1;
     }
 
     .weight-info {
+      margin-bottom: 4px;
+    }
+
+    .weight {
+      font-size: 14px;
+      color: #666;
       font-weight: 500;
     }
 
-    .price-info {
-      color: #E31837;
+    .price {
+      font-size: 16px;
       font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .delivery-info {
+      font-size: 12px;
+      color: #00a642;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .delivery-info i {
+      font-size: 14px;
     }
 
     .quantity-control {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
     }
 
-    .delivery-info {
-      font-size: 0.8rem;
-      color: #28a745;
+    .controls {
+      min-width: 80px;
     }
 
-    .delivery-info i {
-      margin-right: 4px;
+    .add-btn {
+      width: 100%;
+      background: white;
+      color: #E31837;
+      border: 1px solid #E31837;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .add-btn:hover {
+      background: rgba(227, 24, 55, 0.1);
     }
 
     .quantity-buttons {
       display: flex;
       align-items: center;
       gap: 8px;
+      background: #f8f8f8;
+      border-radius: 4px;
+      padding: 4px;
     }
 
     .quantity-buttons button {
-      width: 30px;
-      height: 30px;
-      padding: 0;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: #E31837;
+      color: white;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0;
     }
 
     .quantity {
+      font-size: 14px;
       font-weight: 500;
-      min-width: 20px;
+      color: #1a1a1a;
+      min-width: 24px;
       text-align: center;
-    }
-
-    .btn-brown {
-      background-color: #E31837;
-      color: white;
-    }
-
-    .btn-outline-brown {
-      color: #E31837;
-      border-color: #E31837;
-    }
-
-    .btn-outline-brown:hover {
-      background-color: #E31837;
-      color: white;
     }
 
     @media (max-width: 768px) {
       .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 16px;
-        padding: 4px;
+        padding: 0 12px;
+      }
+
+      .card-body h3 {
+        font-size: 14px;
+      }
+
+      .card-body p {
+        font-size: 12px;
+      }
+
+      .weight {
+        font-size: 12px;
+      }
+
+      .price {
+        font-size: 14px;
+      }
+
+      .controls {
+        min-width: 70px;
       }
     }
   `]
 })
 export class GoatComponent {
-  products: Product[] = [
+  products: GoatProduct[] = [
     {
-      name: 'Mutton Curry with bone',
+      id: 'GT001',
+      name: 'Mutton Curry Cut with Bone',
+      description: 'Fresh goat meat curry cut with bone, perfect for traditional curries and biryanis',
       image: 'assets/images/Mcurrywithbone.webp',
-      description: 'Fresh goat meat curry cut with bone',
-      quantity: 0,
-      weightOptions: [
+      variants: [
         { weight: '1 kg', price: 800 },
-        { weight: '1/2 kg', price: 400 }
-      ]
+        { weight: '500 g', price: 400 }
+      ],
+      quantity: 0
     },
     {
-      name: 'Mutton Curry without bone',
+      id: 'GT002',
+      name: 'Mutton Curry Cut without Bone',
+      description: 'Premium boneless goat meat pieces, ideal for quick cooking and special dishes',
       image: 'assets/images/Mutton Curry without Bone.jpg',
-      description: 'Premium boneless goat meat pieces',
-      quantity: 0,
-      weightOptions: [
+      variants: [
         { weight: '1 kg', price: 950 },
-        { weight: '1/2 kg', price: 475 }
-      ]
+        { weight: '500 g', price: 475 }
+      ],
+      quantity: 0
     },
     {
-      name: 'Mutton Chops Curry',
+      id: 'GT003',
+      name: 'Mutton Chops',
+      description: 'Fresh goat chops, perfect for grilling and barbecue',
       image: 'assets/images/Muttonchops.webp',
-      description: 'Fresh goat Chops',
-      quantity: 0,
-      weightOptions: [ 
-        
+      variants: [
         { weight: '1 kg', price: 900 },
-
-        { weight: '1/2 kg', price: 450 }
-      ]
+        { weight: '500 g', price: 450 }
+      ],
+      quantity: 0
     },
     {
-      name: 'Mutton Breast Curry',
+      id: 'GT004',
+      name: 'Mutton Breast Curry Cut',
+      description: 'Tender goat breast pieces, ideal for slow-cooked dishes',
       image: 'assets/images/Mbreastcurry.webp',
-      description: 'Fresh goat breast',
-      quantity: 0,
-      weightOptions: [
+      variants: [
         { weight: '1 kg', price: 900 },
-
-        { weight: '1/2 kg', price: 450 }
-      ]
+        { weight: '500 g', price: 450 }
+      ],
+      quantity: 0
     }
   ];
 
   constructor(private cartService: CartService) {}
 
-  addToCart(product: Product, option: WeightOption): void {
+  addToCart(product: GoatProduct, variant: { weight: string; price: number }) {
     product.quantity = 1;
-    product.selectedOption = option;
+    product.selectedVariant = variant;
     
     const cartItem: CartItem = {
-      id: product.name + '-' + option.weight,
+      id: `${product.id}-${variant.weight}`,
       name: product.name,
       image: product.image,
-      weight: option.weight,
-      price: option.price,
+      weight: variant.weight,
+      price: variant.price,
       quantity: 1
     };
 
     this.cartService.addToCart(cartItem);
   }
 
-  increaseQuantity(product: Product): void {
-    if (product.selectedOption) {
-      product.quantity++;
-      this.cartService.addToCart({
-        id: product.name + '-' + product.selectedOption.weight,
-        name: product.name,
-        image: product.image,
-        weight: product.selectedOption.weight,
-        price: product.selectedOption.price,
-        quantity: product.quantity
-      });
-    }
+  increaseQuantity(product: GoatProduct, variant: { weight: string; price: number }) {
+    product.quantity++;
+    
+    const cartItem: CartItem = {
+      id: `${product.id}-${variant.weight}`,
+      name: product.name,
+      image: product.image,
+      weight: variant.weight,
+      price: variant.price,
+      quantity: product.quantity
+    };
+
+    this.cartService.addToCart(cartItem);
   }
 
-  decreaseQuantity(product: Product): void {
+  decreaseQuantity(product: GoatProduct) {
     if (product.quantity > 0) {
       product.quantity--;
       if (product.quantity === 0) {
-        product.selectedOption = undefined;
+        product.selectedVariant = undefined;
       }
-      if (product.selectedOption) {
-        this.cartService.addToCart({
-          id: product.name + '-' + product.selectedOption.weight,
+      if (product.selectedVariant) {
+        const cartItem: CartItem = {
+          id: `${product.id}-${product.selectedVariant.weight}`,
           name: product.name,
           image: product.image,
-          weight: product.selectedOption.weight,
-          price: product.selectedOption.price,
+          weight: product.selectedVariant.weight,
+          price: product.selectedVariant.price,
           quantity: product.quantity
-        });
+        };
+        this.cartService.addToCart(cartItem);
       }
     }
   }

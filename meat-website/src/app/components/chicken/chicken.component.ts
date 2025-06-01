@@ -25,15 +25,14 @@ interface ChickenProduct {
   imports: [CommonModule],
   template: `
     <div class="container my-5">
-      <h1 class="mb-4">Fresh Chicken</h1>
+      <h1 class="section-title">Fresh Chicken</h1>
       
       <!-- Categories -->
-      <div class="category-tabs mb-4">
+      <div class="category-tabs">
         <button 
           *ngFor="let cat of categories" 
-          class="btn"
-          [class.btn-brown]="selectedCategory === cat"
-          [class.btn-outline-brown]="selectedCategory !== cat"
+          class="category-btn"
+          [class.active]="selectedCategory === cat"
           (click)="selectedCategory = cat">
           {{ cat }}
         </button>
@@ -44,6 +43,7 @@ interface ChickenProduct {
           <div class="product-card">
             <div class="img-wrapper">
               <img [src]="product.image" [alt]="product.name">
+              <div class="discount-tag" *ngIf="product.category === 'Special Cuts'">SPECIAL</div>
             </div>
             <div class="card-body">
               <h3>{{ product.name }}</h3>
@@ -62,15 +62,18 @@ interface ChickenProduct {
                     <div class="quantity-control">
                       <div class="delivery-info">
                         <i class="bi bi-lightning-fill"></i>
-                        Today in 120 mins
+                        Today in 90 mins
                       </div>
                       <div class="controls" *ngIf="product.quantity === 0 || (product.selectedVariant !== variant)">
-                        <button class="btn btn-brown" (click)="addToCart(product, variant)">Add to Cart</button>
+                        <button class="btn-add" (click)="addToCart(product, variant)">
+                          ADD
+                          <span class="plus-icon">+</span>
+                        </button>
                       </div>
                       <div class="controls quantity-buttons" *ngIf="product.quantity > 0 && product.selectedVariant === variant">
-                        <button class="btn btn-outline-brown" (click)="decreaseQuantity(product)">−</button>
+                        <button (click)="decreaseQuantity(product)">−</button>
                         <span class="quantity">{{ product.quantity }}</span>
-                        <button class="btn btn-outline-brown" (click)="increaseQuantity(product, variant)">+</button>
+                        <button (click)="increaseQuantity(product, variant)">+</button>
                       </div>
                     </div>
                   </div>
@@ -83,150 +86,256 @@ interface ChickenProduct {
     </div>
   `,
   styles: [`
+    .section-title {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
     .category-tabs {
       display: flex;
-      gap: 1rem;
+      gap: 12px;
       overflow-x: auto;
-      padding-bottom: 1rem;
-      margin-bottom: 2rem;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      justify-content: center;
     }
 
-    .btn-brown {
-      background-color: #E31837;
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-btn {
+      padding: 8px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 24px;
+      background: white;
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .category-btn.active {
+      background: #E31837;
       color: white;
-    }
-
-    .btn-outline-brown {
-      color: #E31837;
       border-color: #E31837;
     }
 
-    .btn-outline-brown:hover {
-      background-color: #E31837;
-      color: white;
+    .category-btn:hover:not(.active) {
+      border-color: #E31837;
+      color: #E31837;
     }
 
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 24px;
-      margin: 0;
-      padding: 8px;
+      padding: 0 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .product-item {
+      display: flex;
+      height: 100%;
     }
 
     .product-card {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
       background: white;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       overflow: hidden;
-      transition: transform 0.2s;
+      border: 1px solid #f0f0f0;
+      transition: all 0.3s ease;
+      padding: 12px;
     }
 
     .product-card:hover {
-      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
     }
 
     .img-wrapper {
-      height: 200px;
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 8px;
       overflow: hidden;
+      background: #f8f8f8;
     }
 
     .img-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
     .card-body {
-      padding: 1rem;
+      padding: 12px 0;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .card-body h3 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 8px;
+      line-height: 1.3;
     }
 
     .card-body p {
+      font-size: 14px;
       color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
+      margin: 0 0 12px;
+      line-height: 1.4;
     }
 
-    .weight-options .option {
-      margin-bottom: 0.5rem;
+    .weight-options {
+      margin-top: auto;
+    }
+
+    .option {
+      margin-bottom: 8px;
+    }
+
+    .option:last-child {
+      margin-bottom: 0;
     }
 
     .price-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem;
-      background: #f8f9fa;
-      border-radius: 4px;
+      gap: 8px;
     }
 
     .weight-price-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex: 1;
     }
 
     .weight-info {
+      margin-bottom: 4px;
+    }
+
+    .weight {
+      font-size: 14px;
+      color: #666;
       font-weight: 500;
     }
 
-    .price-info {
-      color: #E31837;
+    .price {
+      font-size: 16px;
       font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .delivery-info {
+      font-size: 12px;
+      color: #00a642;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .delivery-info i {
+      font-size: 14px;
     }
 
     .quantity-control {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
     }
 
-    .delivery-info {
-      font-size: 0.8rem;
-      color: #28a745;
-    }
-
-    .delivery-info i {
-      margin-right: 4px;
+    .controls {
+      min-width: 80px;
     }
 
     .quantity-buttons {
       display: flex;
       align-items: center;
       gap: 8px;
+      background: #f8f8f8;
+      border-radius: 4px;
+      padding: 4px;
     }
 
     .quantity-buttons button {
-      width: 30px;
-      height: 30px;
-      padding: 0;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: #E31837;
+      color: white;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0;
     }
 
     .quantity {
+      font-size: 14px;
       font-weight: 500;
-      min-width: 20px;
+      color: #1a1a1a;
+      min-width: 24px;
       text-align: center;
     }
 
+    .discount-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #E31837;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 2;
+    }
+
     @media (max-width: 768px) {
-      .category-tabs {
-        flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+        padding: 0 12px;
       }
 
-      .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 16px;
-        padding: 4px;
+      .card-body h3 {
+        font-size: 14px;
+      }
+
+      .card-body p {
+        font-size: 12px;
+      }
+
+      .weight {
+        font-size: 12px;
+      }
+
+      .price {
+        font-size: 14px;
+      }
+
+      .controls {
+        min-width: 70px;
       }
     }
   `]

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
@@ -29,36 +29,148 @@ interface ComboPack {
       <!-- Carousel Section -->
       <div class="carousel-section">
         <div class="carousel-container">
-        <div class="carousel">
-            <div class="carousel-inner" [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
-              <div class="carousel-item" *ngFor="let item of carouselItems">
-            <div class="carousel-content">
-                  <div class="content-wrapper">
-              <h2>{{ item.title }}</h2>
-                    <h3>{{ item.subtitle }}</h3>
+          <div class="main-carousel">
+            <div class="carousel">
+              <div class="carousel-inner" [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
+                <!-- Happy Hours Daily Offer -->
+                <div class="carousel-item">
+                  <div class="carousel-content happy-hours">
+                    <div class="offer-wrapper">
+                      <div class="offer-badge">
+                        <i class="bi bi-clock-fill"></i>
+                        Happy Hours
+                      </div>
+                      <div class="offer-details">
+                        <h2>Daily Special Discount</h2>
+                        <div class="time-badge">
+                          <i class="bi bi-alarm"></i>
+                          6 PM - 8 PM
+                        </div>
+                        <div class="discount-info">
+                          <div class="discount-badge">
+                            <span class="discount-amount">5%</span>
+                            <span class="discount-text">OFF</span>
+                          </div>
+                          <div class="offer-description">
+                            <p class="condition">On orders above ₹150</p>
+                            <p class="validity">*Valid every day during happy hours</p>
+                          </div>
+                        </div>
+                        <button class="shop-now-btn">
+                          Order Now <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <div class="timer-strip">Limited Time Offer!</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sunday Special -->
+                <div class="carousel-item">
+                  <div class="carousel-content sunday-special">
+                    <div class="offer-wrapper">
+                      <div class="offer-badge sunday">
+                        <i class="bi bi-calendar-heart-fill"></i>
+                        Sunday Special
+                      </div>
+                      <div class="offer-details">
+                        <h2>Weekend Bulk Offer</h2>
+                        <div class="bulk-badge">
+                          <i class="bi bi-box-seam-fill"></i>
+                          Bulk Orders
+                        </div>
+                        <div class="discount-info">
+                          <div class="discount-badge">
+                            <span class="discount-amount">5%</span>
+                            <span class="discount-text">OFF</span>
+                          </div>
+                          <div class="offer-description">
+                            <p class="condition">On orders above ₹1000</p>
+                            <p class="validity">*Valid only on Sundays</p>
+                          </div>
+                        </div>
+                        <button class="shop-now-btn">
+                          Shop Now <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <div class="timer-strip">Sunday Special Deal!</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Combo Pack Offers -->
+                <div class="carousel-item">
+                  <div class="carousel-content combo-special">
+                    <div class="offer-wrapper">
+                      <div class="offer-badge combo">
+                        <i class="bi bi-gift-fill"></i>
+                        Combo Offers
+                      </div>
+                      <div class="offer-details">
+                        <h2>Daily Combo Pack Offers</h2>
+                        <div class="combo-list">
+                          <div class="combo-item">
+                            <div class="combo-content">
+                              <i class="bi bi-check2-circle"></i>
+                              <div class="combo-text">
+                                <span class="combo-main">500g Chicken + 500g Mutton</span>
+                                <span class="free-item">
+                                  <i class="bi bi-plus-circle"></i>
+                                  Get 2 Lollipops FREE
+                                </span>
+                              </div>
+                            </div>
+                            <div class="combo-badge">COMBO 1</div>
+                          </div>
+                          <div class="combo-item">
+                            <div class="combo-content">
+                              <i class="bi bi-check2-circle"></i>
+                              <div class="combo-text">
+                                <span class="combo-main">1kg Chicken + 500g Boneless</span>
+                                <span class="free-item">
+                                  <i class="bi bi-plus-circle"></i>
+                                  Get 2 Drumsticks FREE
+                                </span>
+                              </div>
+                            </div>
+                            <div class="combo-badge">COMBO 2</div>
+                          </div>
+                        </div>
+                        <button class="shop-now-btn">
+                          Grab Offer <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <div class="timer-strip">Daily Fresh Combos!</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Carousel Controls -->
+              <button class="carousel-control prev" (click)="prevSlide()">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <button class="carousel-control next" (click)="nextSlide()">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+
+              <!-- Carousel Indicators -->
+              <div class="carousel-indicators">
+                <button *ngFor="let _ of [1,2,3]; let i = index" 
+                        [class.active]="i === currentSlide"
+                        (click)="goToSlide(i)">
+                </button>
+              </div>
             </div>
-            <button class="carousel-control prev" (click)="prevSlide()">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-            <button class="carousel-control next" (click)="nextSlide()">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-          <div class="carousel-indicators">
-            <button *ngFor="let item of carouselItems; let i = index" 
-                    [class.active]="i === currentSlide"
-                    (click)="goToSlide(i)">
-            </button>
           </div>
-        </div>
-          <app-blinking-poster class="carousel-posters"></app-blinking-poster>
+          <div class="side-poster">
+            <app-blinking-poster (orderNowClicked)="scrollToCategories()"></app-blinking-poster>
+          </div>
         </div>
       </div>
 
       <!-- Categories Section -->
-      <section class="categories-section">
+      <section class="categories-section" #categoriesSection>
         <div class="container">
           <h2 class="section-title">Our Categories</h2>
           <div class="categories-grid">
@@ -116,7 +228,7 @@ interface ComboPack {
     .carousel-section {
       position: relative;
       background: #fff1f4;
-      padding: 20px 0;
+      padding: 30px 0;
       margin-bottom: 40px;
     }
 
@@ -125,111 +237,343 @@ interface ComboPack {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 20px;
-      display: flex;
-      gap: 15px;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .main-carousel {
+      width: 100%;
     }
 
     .carousel {
       position: relative;
       overflow: hidden;
-      width: 85%;
-      height: 200px;
-      border-radius: 8px;
-      background: #fff1f4;
+      width: 100%;
+      height: 400px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
     .carousel-inner {
       display: flex;
-      transition: transform 0.5s ease-in-out;
       height: 100%;
+      transition: transform 0.5s ease-in-out;
     }
 
     .carousel-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      min-width: 100%;
       height: 100%;
-      text-align: center;
-    }
-
-    .carousel-item img {
-      height: 100%;
-      width: auto;
-      object-fit: contain;
-      margin-right: 0;
     }
 
     .carousel-content {
       width: 100%;
-      text-align: center;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
     }
 
-    .content-wrapper {
+    .happy-hours {
+      background: linear-gradient(135deg, #ffe6e6 0%, #fff1f4 100%);
+    }
+
+    .sunday-special {
+      background: linear-gradient(135deg, #fff0e6 0%, #fff9f0 100%);
+    }
+
+    .combo-special {
+      background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+    }
+
+    .offer-wrapper {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
       max-width: 800px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transform: translateY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .offer-wrapper:hover {
+      transform: translateY(-5px);
+    }
+
+    .offer-badge {
+      position: absolute;
+      top: 20px;
+      right: -35px;
+      background: #E31837;
+      color: white;
+      padding: 8px 40px;
+      transform: rotate(45deg);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 1;
+    }
+
+    .offer-badge.sunday {
+      background: #ff6b6b;
+    }
+
+    .offer-badge.combo {
+      background: #4CAF50;
+    }
+
+    .offer-details {
+      padding: 20px 0;
+      max-width: 600px;
       margin: 0 auto;
     }
 
-    .carousel-content h2 {
-      color: #E31837;
-      font-size: 2rem;
-      margin-bottom: 10px;
-      font-weight: bold;
+    .offer-details h2 {
+      color: #1a1a1a;
+      font-size: 36px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .carousel-content h3 {
+    .time-badge, .bulk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .time-badge {
+      background: #fff1f4;
+      color: #E31837;
+    }
+
+    .bulk-badge {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .discount-info {
+      margin: 25px 0;
+      position: relative;
+    }
+
+    .discount-badge {
+      display: inline-flex;
+      flex-direction: column;
+      background: #E31837;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      transform: scale(1);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(227, 24, 55, 0.2);
+    }
+
+    .discount-amount {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .discount-text {
+      font-size: 24px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .offer-description {
+      margin-top: 15px;
+    }
+
+    .condition {
       color: #333;
-      font-size: 1.5rem;
-      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .validity {
+      color: #666;
+      font-size: 14px;
+      font-style: italic;
+    }
+
+    .combo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 25px 0;
+    }
+
+    .combo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      position: relative;
+    }
+
+    .combo-item:hover {
+      background: #fff;
+      border-color: #4CAF50;
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(76, 175, 80, 0.1);
+    }
+
+    .combo-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .combo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      text-align: left;
+    }
+
+    .combo-main {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .free-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #4CAF50;
+      font-weight: 500;
+    }
+
+    .combo-badge {
+      background: #4CAF50;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .timer-strip {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(227, 24, 55, 0.1);
+      color: #E31837;
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .shop-now-btn {
+      background: #E31837;
+      color: white;
+      border: none;
+      padding: 15px 35px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 25px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 12px rgba(227, 24, 55, 0.2);
+    }
+
+    .shop-now-btn:hover {
+      background: #c41530;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(227, 24, 55, 0.3);
     }
 
     .carousel-control {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: #E31837;
+      background: rgba(255, 255, 255, 0.9);
       border: none;
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
-      color: white;
+      font-size: 1.2rem;
+      color: #E31837;
       transition: all 0.3s ease;
       z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .carousel-control:hover {
-      background: #c41530;
+      background: #E31837;
+      color: white;
+      transform: translateY(-50%) scale(1.1);
     }
 
     .carousel-control.prev {
-      left: 5px;
+      left: 20px;
     }
 
     .carousel-control.next {
-      right: 5px;
+      right: 20px;
     }
 
     .carousel-indicators {
       position: absolute;
-      bottom: 10px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 6px;
+      gap: 8px;
       z-index: 2;
     }
 
     .carousel-indicators button {
-      width: 6px;
-      height: 6px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       border: none;
-      background: rgba(227, 24, 55, 0.5);
+      background: rgba(255, 255, 255, 0.5);
       cursor: pointer;
       padding: 0;
       transition: all 0.3s ease;
@@ -254,22 +598,31 @@ interface ComboPack {
     .section-title {
       text-align: center;
       margin-bottom: 40px;
-      color: #333;
-      font-size: 2rem;
+      color: #1a1a1a;
+      font-size: 28px;
+      font-weight: 600;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: #E31837;
+      border-radius: 2px;
     }
 
     .categories-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
       padding: 0 20px;
       max-width: 1200px;
       margin: 0 auto;
-    }
-
-    .category-card:nth-child(4),
-    .category-card:nth-child(5) {
-      transform: translateX(50%);
     }
 
     .category-card {
@@ -277,89 +630,212 @@ interface ComboPack {
       flex-direction: column;
       align-items: center;
       text-decoration: none;
-      transition: transform 0.3s ease;
+      padding: 20px;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .category-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(45deg, #ffe6e9, #fff1f4);
+      z-index: 0;
+      border-radius: 16px 16px 50% 50%;
+      transition: all 0.3s ease;
     }
 
     .category-card:hover {
       transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.12);
     }
 
-    .category-card:nth-child(4):hover,
-    .category-card:nth-child(5):hover {
-      transform: translateX(50%) translateY(-5px);
-    }
-
-    .category-image {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      overflow: hidden;
-      margin-bottom: 15px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      border: 3px solid #fff;
-      transition: box-shadow 0.3s ease;
+    .category-card:hover::before {
+      height: 130px;
+      background: linear-gradient(45deg, #ffd6dc, #ffe6e9);
     }
 
     .category-card:hover .category-image {
-      box-shadow: 0 6px 12px rgba(227, 24, 55, 0.2);
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(227, 24, 55, 0.15);
+    }
+
+    .category-image {
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .category-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .category-card:hover .category-image img {
+      transform: scale(1.1);
     }
 
     .category-card h3 {
-      color: #333;
-      font-size: 1.2rem;
+      color: #1a1a1a;
+      font-size: 18px;
       text-align: center;
       margin: 0;
-      font-weight: 500;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+      transition: color 0.3s ease;
+    }
+
+    .category-card:hover h3 {
+      color: #E31837;
+    }
+
+    @media (max-width: 1200px) {
+      .carousel-container {
+        grid-template-columns: 1fr 250px;
+        gap: 15px;
+      }
+
+      .carousel {
+        height: 350px;
+      }
+
+      .offer-details h2 {
+        font-size: 32px;
+      }
     }
 
     @media (max-width: 992px) {
-      .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
+      .carousel-container {
+        grid-template-columns: 1fr;
       }
 
-      .category-card:nth-child(4),
-      .category-card:nth-child(5) {
-        transform: none;
+      .side-poster {
+        display: none;
       }
 
-      .category-card:nth-child(4):hover,
-      .category-card:nth-child(5):hover {
-        transform: translateY(-5px);
+      .carousel {
+        height: 300px;
+      }
+
+      .offer-wrapper {
+        padding: 30px;
+      }
+
+      .offer-details h2 {
+        font-size: 28px;
+      }
+
+      .time-badge, .bulk-badge {
+        font-size: 16px;
+        padding: 8px 16px;
+      }
+
+      .discount-amount {
+        font-size: 36px;
+      }
+
+      .discount-text {
+        font-size: 20px;
+      }
+
+      .condition {
+        font-size: 16px;
+      }
+
+      .combo-item {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+      }
+
+      .combo-content {
+        width: 100%;
+      }
+
+      .combo-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      .shop-now-btn {
+        padding: 12px 25px;
+        font-size: 16px;
       }
     }
 
     @media (max-width: 768px) {
-      .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        padding: 0 15px;
+      .carousel-section {
+        padding: 20px 0;
       }
 
-      .category-image {
-        width: 140px;
-        height: 140px;
+      .carousel {
+        height: 400px;
       }
 
-      .category-card h3 {
-        font-size: 1.1rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .category-image {
-        width: 120px;
-        height: 120px;
+      .carousel-content {
+        padding: 20px;
       }
 
-      .category-card h3 {
+      .offer-wrapper {
+        padding: 20px;
+      }
+
+      .offer-details h2 {
+        font-size: 28px;
+      }
+
+      .combo-item {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+      }
+
+      .combo-content {
+        width: 100%;
+      }
+
+      .combo-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      .shop-now-btn {
+        padding: 12px 25px;
+        font-size: 16px;
+      }
+
+      .carousel-control {
+        width: 35px;
+        height: 35px;
         font-size: 1rem;
+      }
+
+      .category-image {
+        width: 90px;
+        height: 100px;
       }
     }
 
@@ -529,52 +1005,70 @@ interface ComboPack {
     }
   `]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
+  @ViewChild('categoriesSection') categoriesSection!: ElementRef;
+  
   currentSlide = 0;
+  private autoScrollInterval: any;
 
   carouselItems = [
     {
-      title: 'Entry Poster - 1',
-      subtitle: 'Daily Offer'
+      type: 'daily',
+      badge: 'Daily Offer',
+      badgeType: 'daily',
+      title: 'Happy Hours Discount',
+      time: '6 PM - 8 PM',
+      discount: '5% OFF',
+      condition: 'On orders above ₹150'
     },
     {
-      title: 'Entry Poster - 2',
-      subtitle: 'Only on Sunday'
+      type: 'sunday',
+      badge: 'Sunday Special',
+      badgeType: 'sunday',
+      title: 'Bulk Order Discount',
+      discount: '5% OFF',
+      condition: 'On orders above ₹1000'
     },
     {
-      title: 'Entry Poster - 3',
-      subtitle: 'Daily'
+      type: 'combo',
+      badge: 'Combo Offers',
+      badgeType: 'combo',
+      title: 'Daily Combo Pack Offers',
+      combos: [
+        'Buy 500g chicken + 500g mutton - Get 2 lollipops FREE',
+        'Buy 1kg chicken + 500g boneless chicken - Get 2 drumsticks FREE'
+      ]
     }
   ];
 
   mainCategories: Category[] = [
     {
       name: 'Chicken',
-      image: 'assets/images/chicken.png',
+      image: 'assets/images/c1.png',
       route: '/chicken',
       description: 'Fresh farm-raised chicken'
     },
     {
       name: 'Country Chicken',
-      image: 'assets/images/country_chicken.jpg',
+      image: 'assets/images/c2.png',
       route: '/country-chicken',
       description: 'Traditional free-range chicken'
     },
     {
       name: 'Japanese Quail',
-      image: 'assets/images/quail.jpg',
+      image: 'assets/images/jq3.png',
       route: '/japanese-quail',
       description: 'Premium quality quail meat'
     },
     {
       name: 'Turkey Bird',
-      image: 'assets/images/turkey.jpg',
+      image: 'assets/images/tb4.png',
       route: '/turkey',
       description: 'Fresh turkey meat'
     },
     {
       name: 'Goat',
-      image: 'assets/images/goat.png',
+      image: 'assets/images/g5.png',
       route: '/goat',
       description: 'Premium goat meat cuts'
     }
@@ -617,18 +1111,42 @@ export class HomeComponent {
 
   constructor(private cartService: CartService) {}
 
+  ngOnInit() {
+    this.startAutoScroll();
+  }
+
+  ngOnDestroy() {
+    this.stopAutoScroll();
+  }
+
+  startAutoScroll() {
+    this.autoScrollInterval = setInterval(() => {
+      this.nextSlide();
+    }, 5000); // Change slide every 5 seconds
+  }
+
+  stopAutoScroll() {
+    if (this.autoScrollInterval) {
+      clearInterval(this.autoScrollInterval);
+    }
+  }
+
   prevSlide() {
+    this.stopAutoScroll(); // Stop auto-scroll when user interacts
     this.currentSlide = this.currentSlide === 0 ? 
-      this.carouselItems.length - 1 : this.currentSlide - 1;
+      2 : this.currentSlide - 1;
+    this.startAutoScroll(); // Restart auto-scroll
   }
 
   nextSlide() {
-    this.currentSlide = this.currentSlide === this.carouselItems.length - 1 ? 
+    this.currentSlide = this.currentSlide === 2 ? 
       0 : this.currentSlide + 1;
   }
 
   goToSlide(index: number) {
+    this.stopAutoScroll(); // Stop auto-scroll when user interacts
     this.currentSlide = index;
+    this.startAutoScroll(); // Restart auto-scroll
   }
 
   addComboToCart(pack: ComboPack) {
@@ -662,5 +1180,17 @@ export class HomeComponent {
       pack.quantity! -= 1;
       this.cartService.removeFromCart(pack.name);
     }
+  }
+
+  getAllSlides() {
+    // Return array with length equal to total number of slides (blinking poster + carousel items)
+    return new Array(this.carouselItems.length + 1);
+  }
+
+  scrollToCategories() {
+    this.categoriesSection.nativeElement.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
   }
 }

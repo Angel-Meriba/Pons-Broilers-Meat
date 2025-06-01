@@ -21,16 +21,16 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
         </a>
         
         <!-- Mobile Toggle -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <button class="navbar-toggler" type="button" (click)="toggleMobileMenu()">
           <span class="navbar-toggler-icon"></span>
         </button>
         
         <!-- Main Navigation Content -->
-        <div class="collapse navbar-collapse" id="navbarContent">
+        <div class="collapse navbar-collapse" [class.show]="isMobileMenuOpen" id="navbarContent">
           <!-- Location Selector -->
-          <div class="nav-item location-selector">
+          <div class="nav-item location-selector" (click)="openLocationInMaps()">
             <i class="bi bi-geo-alt"></i>
-            <a href="https://g.co/kgs/Lxbc95d" target="_blank" class="location-link">
+            <a class="location-link">
               <span class="location-text">Thoothukudi</span>
               <span class="location-subtext">Tamil Nadu, India</span>
             </a>
@@ -49,7 +49,7 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
                 placeholder="Search for meat products..."
                 name="search"
                 autocomplete="off">
-              <button class="btn btn-outline-brown" type="button">
+              <button class="btn btn-outline-brown" type="button" (click)="performSearch()">
                 <i class="bi bi-search"></i>
               </button>
 
@@ -97,25 +97,36 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
 
           <!-- Right Navigation Items -->
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <li class="nav-item dropdown" [class.show]="activeDropdown === 'categories'">
+              <a class="nav-link dropdown-toggle" (click)="toggleDropdown('categories', $event)">
+                <i class="bi bi-grid"></i>
                 Categories
               </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" (click)="navigateTo('/chicken', $event)">Chicken</a></li>
-                <li><a class="dropdown-item" (click)="navigateTo('/country-chicken', $event)">Country Chicken</a></li>
-                <li><a class="dropdown-item" (click)="navigateTo('/japanese-quail', $event)">Japanese Quail</a></li>
-                <li><a class="dropdown-item" (click)="navigateTo('/turkey', $event)">Turkey Bird</a></li>
-                <li><a class="dropdown-item" (click)="navigateTo('/goat', $event)">Goat</a></li>
+              <ul class="dropdown-menu" [class.show]="activeDropdown === 'categories'">
+                <li><a class="dropdown-item" (click)="navigateTo('/chicken', $event)">
+                  <i class="bi bi-arrow-right-circle"></i>Chicken
+                </a></li>
+                <li><a class="dropdown-item" (click)="navigateTo('/country-chicken', $event)">
+                  <i class="bi bi-arrow-right-circle"></i>Country Chicken
+                </a></li>
+                <li><a class="dropdown-item" (click)="navigateTo('/japanese-quail', $event)">
+                  <i class="bi bi-arrow-right-circle"></i>Japanese Quail
+                </a></li>
+                <li><a class="dropdown-item" (click)="navigateTo('/turkey', $event)">
+                  <i class="bi bi-arrow-right-circle"></i>Turkey Bird
+                </a></li>
+                <li><a class="dropdown-item" (click)="navigateTo('/goat', $event)">
+                  <i class="bi bi-arrow-right-circle"></i>Goat
+                </a></li>
               </ul>
             </li>
             <li class="nav-item">
               <ng-container *ngIf="authService.currentUser$ | async as user; else loginLink">
-                <div class="dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <div class="dropdown" [class.show]="activeDropdown === 'account'">
+                  <a class="nav-link dropdown-toggle" (click)="toggleDropdown('account', $event)">
                     <i class="bi bi-person"></i> My Account
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu" [class.show]="activeDropdown === 'account'">
                     <li><a class="dropdown-item" (click)="navigateTo('/orders', $event)">
                       <i class="bi bi-box-seam me-2"></i>My Orders
                     </a></li>
@@ -123,7 +134,7 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
                       <i class="bi bi-person-circle me-2"></i>Profile Settings
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" (click)="logout($event)">
+                    <li><a class="dropdown-item" (click)="logout($event)">
                       <i class="bi bi-box-arrow-right me-2"></i>Logout
                     </a></li>
                   </ul>
@@ -175,6 +186,8 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       border-right: 1px solid #e0e0e0;
       margin-right: 1rem;
       height: 100%;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .location-selector i {
@@ -223,11 +236,13 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       padding-right: 40px;
       font-size: 0.9rem;
       height: 36px;
+      transition: all 0.3s ease;
     }
 
     .search-input:focus {
       box-shadow: none;
       border-color: #E31837;
+      background-color: #fff;
     }
 
     .btn-outline-brown {
@@ -237,11 +252,18 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       border-left: none;
       padding: 0.375rem 1rem;
       height: 36px;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
 
     .btn-outline-brown:hover {
       color: white;
       background-color: #E31837;
+      transform: translateX(2px);
+    }
+
+    .btn-outline-brown:active {
+      transform: translateX(0);
     }
 
     /* Search Results Dropdown */
@@ -276,12 +298,17 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       align-items: center;
       padding: 8px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.3s ease;
       border-radius: 4px;
     }
 
     .search-item:hover {
       background-color: #f5f5f5;
+      transform: translateX(4px);
+    }
+
+    .search-item:active {
+      transform: translateX(2px);
     }
 
     .search-item i {
@@ -294,12 +321,17 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       align-items: center;
       padding: 12px 16px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.3s ease;
       border-bottom: 1px solid #eee;
     }
 
     .result-item:hover {
       background-color: #f5f5f5;
+      transform: translateX(4px);
+    }
+
+    .result-item:active {
+      transform: translateX(2px);
     }
 
     .result-image {
@@ -363,10 +395,18 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       border-radius: 4px;
       margin-left: 1rem;
       height: 36px;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .cart-link:hover {
       background-color: #f8f8f8;
+      border-color: #E31837;
+      color: #E31837;
+    }
+
+    .cart-link:active {
+      transform: translateY(1px);
     }
 
     .cart-info {
@@ -406,6 +446,80 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
       align-items: center;
       padding: 0 1rem;
       font-size: 0.9rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: #E31837;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #f0f0f0;
+      min-width: 200px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dropdown-toggle::after {
+      display: inline-block;
+      margin-left: 8px;
+      vertical-align: middle;
+      content: "";
+      border-top: 4px solid;
+      border-right: 4px solid transparent;
+      border-bottom: 0;
+      border-left: 4px solid transparent;
+      transition: transform 0.3s ease;
+    }
+
+    .dropdown.show .dropdown-toggle::after {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-item {
+      padding: 10px 16px;
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f8f8f8;
+      color: #E31837;
+    }
+
+    .dropdown-item i {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .dropdown-item:hover i {
+      color: #E31837;
+    }
+
+    .dropdown-divider {
+      margin: 8px 0;
+      border-top: 1px solid #f0f0f0;
     }
 
     /* Responsive Styles */
@@ -461,6 +575,19 @@ import { debounceTime, distinctUntilChanged, takeUntil, filter } from 'rxjs/oper
         height: auto;
         padding: 0.5rem 0;
       }
+
+      .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        border: none;
+        background: #f8f8f8;
+        margin-top: 8px;
+        border-radius: 4px;
+      }
+
+      .dropdown-item {
+        padding: 12px 16px;
+      }
     }
   `]
 })
@@ -470,6 +597,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   searchResults: SearchResult[] = [];
   recentSearches: string[] = [];
   popularSearches: string[] = [];
+  activeDropdown: string | null = null;
+  isMobileMenuOpen = false;
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -497,22 +626,63 @@ export class HeaderComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Close dropdowns when clicking outside
     document.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.search-container')) {
+      if (!target.closest('.dropdown') && !target.closest('.search-container')) {
+        this.activeDropdown = null;
         this.hideResults();
       }
     });
   }
 
   ngOnInit() {
-    // Subscribe to router events to handle scroll behavior
+    // Subscribe to router events to handle scroll behavior and close dropdowns
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       takeUntil(this.destroy$)
     ).subscribe(() => {
       window.scrollTo(0, 0);
+      this.activeDropdown = null;
+      this.isMobileMenuOpen = false;
     });
+  }
+
+  toggleDropdown(dropdownName: string, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Toggle the dropdown
+    if (this.activeDropdown === dropdownName) {
+      this.activeDropdown = null;
+    } else {
+      this.activeDropdown = dropdownName;
+    }
+
+    // Add click event listener to close dropdown when clicking outside
+    setTimeout(() => {
+      if (this.activeDropdown) {
+        const closeDropdown = (e: MouseEvent) => {
+          const target = e.target as HTMLElement;
+          if (!target.closest('.dropdown')) {
+            this.activeDropdown = null;
+            document.removeEventListener('click', closeDropdown);
+          }
+        };
+        document.addEventListener('click', closeDropdown);
+      }
+    }, 0);
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    if (!this.isMobileMenuOpen) {
+      this.activeDropdown = null;
+    }
+  }
+
+  openLocationInMaps() {
+    window.open('https://g.co/kgs/Lxbc95d', '_blank');
   }
 
   navigateToHome(event: Event): void {
